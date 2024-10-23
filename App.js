@@ -1,35 +1,76 @@
-import React, { useCallback, useEffect, useState } from "react";
-import Card from "./components/Card";
+import React, { useCallback, useState } from "react";
 import "./App.css";
+import Card from "./components/Card";
+
 function App() {
-  let [task, setTask] = useState("");
-  let [taskList, setTaskList] = useState([]);
+  const [task, setTask] = useState("");
+  const [tasklist, setTasklist] = useState([]);
 
-  const takeTask = useCallback((e) => {
+  function takeTask(e) {
     setTask(e.target.value);
-  });
+  }
 
+  function taskDone(tick) {
+    let tsk = 0;
+    let newlist = tasklist.filter((i, idx) => {
+      if (idx !== tick) {
+        return i;
+      } else {
+        tsk = { text: i.text, done: !i.done };
+      }
+    });
+    newlist = [...newlist, tsk];
+    setTasklist(newlist);
+  }
   const addTask = useCallback(() => {
-    if (task.trim() != "") {
-      setTaskList((previtem) => [...previtem, task]);
+    if (task !== "") {
+      setTasklist((prev) => [{ text: task, done: false }, ...prev]);
       setTask("");
     }
   }, [task]);
+
+  function handleEdit(edt, newText) {
+    const newlist = tasklist.map((i, idx) => {
+      if (idx === edt) {
+        return { text: newText, done: i.done };
+      } else {
+        return i;
+      }
+    });
+    setTasklist(newlist);
+  }
+
+  function handleDelete(del) {
+    const newTasklist = tasklist.filter((i, idx) => {
+      if (idx != del) {
+        return i;
+      }
+    });
+    setTasklist(newTasklist);
+  }
+
   return (
     <div className="main">
-      <h1>To Do List</h1>
-      <div className="task-set">
+      <div className="setTask">
         <input
           type="text"
-          placeholder="Enter Your Task"
-          value={task}
+          placeholder="Enter Here"
           onChange={takeTask}
+          value={task}
         />
-        <button onClick={addTask}>+</button>
+        <button onClick={addTask}>Add Task</button>
       </div>
-      <div className="tasks">
-        {taskList.map((i) => (
-          <Card key={i} text={"*" + i} />
+      <div className="tasklist">
+        {tasklist.map((i, index) => (
+          <Card
+            key={index}
+            text={i.text}
+            index={index}
+            handleDelete={handleDelete}
+            handleEdit={handleEdit}
+            taskDone={taskDone}
+            done={i.done}
+          />
         ))}
       </div>
     </div>
@@ -37,3 +78,4 @@ function App() {
 }
 
 export default App;
+
